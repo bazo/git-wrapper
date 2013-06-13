@@ -16,7 +16,7 @@ namespace GitWrapper;
 /**
  * Class that parses and returnes an array of branches.
  */
-class GitBranches implements \IteratorAggregate
+class GitBranches
 {
 
 	/**
@@ -51,11 +51,48 @@ class GitBranches implements \IteratorAggregate
 	 *
 	 * @return array
 	 */
-	public function fetchBranches($only_remote = false)
+	public function fetchAllBranches()
 	{
 		$this->git->clearOutput();
-		$options = ($only_remote) ? array('r' => true) : array('a' => true);
+		$options = array('a' => true);
 		$output = (string) $this->git->branch($options);
+		$branches = preg_split("/\r\n|\n|\r/", rtrim($output));
+		return array_map(array($this, 'trimBranch'), $branches);
+	}
+
+
+	/**
+	 * Fetches the branches via the `git branch` command.
+	 *
+	 * @param boolean $only_remote
+	 *   Whether to fetch only remote branches, defaults to false which returns
+	 *   all branches.
+	 *
+	 * @return array
+	 */
+	public function fetchRemoteBranches()
+	{
+		$this->git->clearOutput();
+		$options = array('r' => true);
+		$output = (string) $this->git->branch($options);
+		$branches = preg_split("/\r\n|\n|\r/", rtrim($output));
+		return array_map(array($this, 'trimBranch'), $branches);
+	}
+
+
+	/**
+	 * Fetches the branches via the `git branch` command.
+	 *
+	 * @param boolean $only_remote
+	 *   Whether to fetch only remote branches, defaults to false which returns
+	 *   all branches.
+	 *
+	 * @return array
+	 */
+	public function fetchLocalBranches()
+	{
+		$this->git->clearOutput();
+		$output = (string) $this->git->branch();
 		$branches = preg_split("/\r\n|\n|\r/", rtrim($output));
 		return array_map(array($this, 'trimBranch'), $branches);
 	}
@@ -73,38 +110,6 @@ class GitBranches implements \IteratorAggregate
 	public function trimBranch($branch)
 	{
 		return ltrim($branch, ' *');
-	}
-
-
-	/**
-	 * Implements \IteratorAggregate::getIterator().
-	 */
-	public function getIterator()
-	{
-		$branches = $this->all();
-		return new \ArrayIterator($branches);
-	}
-
-
-	/**
-	 * Returns all branches.
-	 *
-	 * @return array
-	 */
-	public function all()
-	{
-		return $this->fetchBranches();
-	}
-
-
-	/**
-	 * Returns only remote branches.
-	 *
-	 * @return array
-	 */
-	public function remote()
-	{
-		return $this->fetchBranches(true);
 	}
 
 
