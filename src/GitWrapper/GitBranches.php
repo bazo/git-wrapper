@@ -32,13 +32,10 @@ class GitBranches
 	 *
 	 * @param GitWorkingCopy $git
 	 *   The working copy that branches are being collected from.
-	 *
-	 * @throws GitException
 	 */
 	public function __construct(GitWorkingCopy $git)
 	{
 		$this->git = clone $git;
-		$output = (string) $git->branch(array('a' => true));
 	}
 
 
